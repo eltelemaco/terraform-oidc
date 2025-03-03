@@ -1,6 +1,8 @@
 # Create an application
 resource "azuread_application_registration" "oidc" {
   display_name = var.identity_name
+  implicit_access_token_issuance_enabled = true
+  implicit_id_token_issuance_enabled = true
 }
 
 # Create federated identities
