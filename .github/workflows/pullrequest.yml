@@ -23,6 +23,15 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     environment: develop
+    env:
+        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_USE_AZUREAD: true
+        ARM_USE_OIDC: true
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -31,6 +40,8 @@ jobs:
     # Install the latest version of Terraform CLI 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
       
     # Log into Azure with OIDC integration
     - name: 'Login to Azure'
@@ -52,15 +63,14 @@ jobs:
 
     # Run Terraform init
     - name: Terraform Init
-      id: init
-      env:
-        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
-        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      run: terraform init -backend-config="storage_account_name=${STORAGE_ACCOUNT}" -backend-config="container_name=${CONTAINER_NAME}" -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"
+      shell: pwsh
+      run: |
+        terraform `
+        init `
+        -backend-config="resource_group_name=${{env.RESOURCE_GROUP_NAME}}" `
+        -backend-config="storage_account_name=${{env.STORAGE_ACCOUNT}}" `
+        -backend-config="container_name=${{env.CONTAINER_NAME}}" `
+        -backend-config="key=terraform.tfstate"
 
     # Run a Terraform fmt
     - name: Terraform format
