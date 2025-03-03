@@ -1,5 +1,5 @@
 module "pull_request" {
-    source = "./Modules/oidc"
+    source = "../Modules/oidc"
 
     identity_name = "dev-oidc-identity"
     repository_name = "eltelemaco/terraform-oidc"
