@@ -8,11 +8,11 @@ on:
 env:
   TF_LOG: INFO
 
-permissions:
-      id-token: write
-      contents: read
 jobs: 
   deploy-infra:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
     # Checkout the repository to the GitHub Actions runner
@@ -24,17 +24,21 @@ jobs:
       uses: hashicorp/setup-terraform@v2
       
     # Log into Azure with OIDC integration
-    - name: 'Az CLI login'
-      uses: azure/login@v1
-      with:
+    - name: 'Login to Azure'      
+      uses: azure/login@v2     
+      with:        
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}        
+        enable-AzPSSession: true
 
     # Run az commands to confirm sub access
-    - name: 'Run az commands'
-      run: |
-        az account show
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
 
     # Run Terraform init
     - name: Terraform Init

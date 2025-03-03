@@ -1,12 +1,13 @@
-module "pull_request" {
+module "development_branch" {
     source = "../Modules/oidc"
 
-    identity_name = "dev-oidc-identity"
+    identity_name = "dev-oidc-identity-02"
     repository_name = "eltelemaco/terraform-oidc"
-    entity_type = "pull_request"     
+    entity_type = "ref"
+    ref_branches = ["main"]     
 }
 
-output "azuread_service_principal" {
+output "service_principal" {
     description = "Azure Service Principal"
-    value = module.pull_request.service_principal  
+    value = module.development_branch.service_principal
 }
