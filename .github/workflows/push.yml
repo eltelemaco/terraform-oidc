@@ -1,0 +1,62 @@
+name: Push
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  TF_LOG: INFO
+
+jobs: 
+  deploy-infra:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Install the latest version of Terraform CLI 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      
+    # Log into Azure with OIDC integration
+    - name: 'Login to Azure'      
+      uses: azure/login@v2     
+      with:        
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}        
+        enable-AzPSSession: true
+
+    # Run az commands to confirm sub access
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
+
+    # Run Terraform init
+    - name: Terraform Init
+      id: init
+      env:
+        STORAGE_ACCOUNT: ${{ secrets.STORAGE_ACCOUNT }}
+        CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+        RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      run: terraform init -backend-config="storage_account_name=${STORAGE_ACCOUNT}" -backend-config="container_name=${CONTAINER_NAME}" -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"
+
+    # Run a Terraform apply
+    - name: Terraform apply
+      id: apply
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      run: terraform apply -auto-approve
