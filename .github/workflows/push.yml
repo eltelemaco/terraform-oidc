@@ -1,9 +1,13 @@
 name: Push
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+      - develop
+  push:
+    branches:
+      - develop
 env:
   TF_LOG: INFO
 
