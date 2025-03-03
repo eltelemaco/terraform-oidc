@@ -27,7 +27,7 @@ jobs:
       
     # Log into Azure with OIDC integration
     - name: 'Az CLI login'
-      uses: azure/login@v1.4.7
+      uses: azure/login@2
       with:
         auth-type: IDENTITY
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
