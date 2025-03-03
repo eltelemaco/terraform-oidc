@@ -1,7 +1,7 @@
 module "development_branch" {
     source = "../Modules/oidc"
 
-    identity_name = "dev-oidc-identity-01"
+    identity_name = "dev-oidc-identity-02"
     repository_name = "eltelemaco/terraform-oidc"
     entity_type = "ref"
     ref_branches = ["main"]     

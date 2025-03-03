@@ -24,8 +24,8 @@ jobs:
       uses: hashicorp/setup-terraform@v2
       
     # Log into Azure with OIDC integration
-    - name: 'Az CLI login'
-      uses: azure/login@v1.5.0
+    - name: 'Login to Azure'      
+      uses: azure/login@v2     
       with:
         auth-type: IDENTITY
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
